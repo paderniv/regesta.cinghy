@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cinghy - Launchpad sandbox</title>
+  <script>
+    window["sap-ushell-config"] = {
+      defaultRenderer: "fiori2",
+      bootstrapPlugins: {
+        cinghy: { component: "regesta.cinghy", url: "../" }
+      },
+      applications: {
+        "CinghyDemo-display": {
+          title: "Ordini demo",
+          description: "App di esempio per la sandbox",
+          additionalInformation: "SAPUI5.Component=regesta.cinghy.test.demoapp",
+          applicationType: "URL",
+          url: "./demoapp"
+        }
+      }
+    };
+  </script>
+  <script src="../resources/sap/ushell/bootstrap/sandbox2.js" id="sap-ushell-bootstrap"></script>
+  <script src="../resources/sap-ui-core.js"
+    id="sap-ui-bootstrap"
+    data-sap-ui-libs="sap.m, sap.ushell"
+    data-sap-ui-async="true"
+    data-sap-ui-theme="sap_horizon"
+    data-sap-ui-language="it"
+    data-sap-ui-compat-version="edge"
+    data-sap-ui-resource-roots='{"regesta.cinghy": "../", "regesta.cinghy.test": "./"}'
+    data-sap-ui-frame-options="allow"
+    data-sap-ui-on-init="module:regesta/cinghy/test/flpInit"></script>
+</head>
+<body class="sapUiBody" id="content"></body>
+</html>

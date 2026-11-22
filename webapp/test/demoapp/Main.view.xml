@@ -1,0 +1,13 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core" xmlns="sap.m"
+  core:require="{ MessageToast: 'sap/m/MessageToast' }">
+  <App>
+  <Page title="Ordini demo">
+    <List headerText="Ordini di acquisto">
+      <StandardListItem title="4500012345" description="Fornitore Rossi S.p.A." info="Bloccato" infoState="Error" />
+      <StandardListItem title="4500012346" description="Fornitore Bianchi S.r.l." info="Rilasciato" infoState="Success" />
+      <StandardListItem title="4500012347" description="Fornitore Verdi S.n.c." info="In approvazione" infoState="Warning" />
+    </List>
+    <Button id="appButton" text="Pulsante dell'app" press="MessageToast.show('Click ricevuto')" />
+  </Page>
+  </App>
+</mvc:View>

@@ -1,0 +1,14 @@
+{
+  "_version": "1.12.0",
+  "sap.app": {
+    "id": "regesta.cinghy.test.demoapp",
+    "type": "application",
+    "title": "Ordini demo",
+    "applicationVersion": { "version": "1.0.0" }
+  },
+  "sap.ui": { "technology": "UI5", "deviceTypes": { "desktop": true, "tablet": true, "phone": true } },
+  "sap.ui5": {
+    "dependencies": { "minUI5Version": "1.136.0", "libs": { "sap.m": {} } },
+    "rootView": { "viewName": "regesta.cinghy.test.demoapp.Main", "type": "XML", "id": "main" }
+  }
+}

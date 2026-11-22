@@ -1,0 +1,20 @@
+{
+  "name": "regesta-cinghy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cinghy - assistente AI nel Fiori Launchpad (plugin regesta.cinghy)",
+  "scripts": {
+    "start": "ui5 serve --open test/flpSandbox.html#Shell-home",
+    "build": "ui5 build --clean-dest"
+  },
+  "dependencies": {
+    "@ui5/webcomponents": "^2.29.0",
+    "@ui5/webcomponents-ai": "^2.29.0",
+    "@ui5/webcomponents-icons": "^2.29.0",
+    "marked": "^18.2.1"
+  },
+  "devDependencies": {
+    "@ui5/cli": "^4.1.0",
+    "ui5-tooling-modules": "^3.43.2"
+  }
+}

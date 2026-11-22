@@ -1,40 +1,84 @@
 sap.ui.define([
-  "sap/ui/core/Component"
-], function (Component) {
+  "sap/ui/core/Component",
+  "sap/ushell/Container",
+  "sap/base/Log"
+], function (Component, Container, Log) {
   "use strict";
 
-  return Component.extend("z.flp.toolbarplugin.Component", {
+  const BUTTON_ID = "regestaCinghyButton";
+
+  function logError(oError) {
+    Log.error("Cinghy: errore del plugin", oError, "regesta.cinghy");
+  }
+
+  return Component.extend("regesta.cinghy.Component", {
     metadata: { manifest: "json" },
 
-    init: async function () {
-      const oContainer = sap.ushell.Container;
-      const oExtension = await oContainer.getServiceAsync("Extension");
+    init: function () {
+      this._oContext = { home: true };
+      // init non deve restituire una Promise: l'avvio asincrono resta interno
+      this._createButton().catch(logError);
+      this._trackContext().catch(logError);
+    },
 
-      // Icona: font SAP ("sap-icon://...") oppure URI di un'immagine propria
-      const sIcon = sap.ui.require.toUrl("z/flp/toolbarplugin/img/mia_icona.svg");
-
+    _createButton: async function () {
+      const oExtension = await Container.getServiceAsync("Extension");
       const oItem = await oExtension.createHeaderItem({
-        id: "zMyToolbarButton",
-        icon: sIcon,
-        tooltip: "La mia applicazione",
-        ariaLabel: "La mia applicazione",
-        press: this._onPress.bind(this)
+        id: BUTTON_ID,
+        icon: sap.ui.require.toUrl("regesta/cinghy/img/03_analisi_dati_occhiali_ar.webp"),
+        tooltip: "Cinghy",
+        ariaLabel: "Cinghy, assistente AI",
+        press: () => this._togglePanel().catch(logError)
       }, {
         position: "end"
       });
-
       oItem.showForAllApps();
+      oItem.showOnHome();
     },
 
-    _onPress: async function () {
-      // Opzione A: navigazione intent-based verso la tua app Fiori
-      const oNav = await sap.ushell.Container.getServiceAsync("Navigation");
-      oNav.navigate({
-        target: { semanticObject: "ZMiaApp", action: "display" }
-      });
+    // Il pannello e i Web Components si caricano solo al primo click.
+    _togglePanel: async function () {
+      if (!this._pPanel) {
+        this._pPanel = new Promise((resolve, reject) => {
+          sap.ui.require(["regesta/cinghy/ChatPanel"], (ChatPanel) => {
+            const oPanel = new ChatPanel(BUTTON_ID);
+            oPanel.setContext(this._oContext);
+            resolve(oPanel);
+          }, reject);
+        });
+      }
+      (await this._pPanel).toggle();
+    },
 
-      // Opzione B: aprire un'app esterna
-      // window.open("https://mia-app.esempio.it", "_blank");
+    _trackContext: async function () {
+      const oAppLifeCycle = await Container.getServiceAsync("AppLifeCycle");
+      const fnUpdate = async () => {
+        this._oContext = await readContext(oAppLifeCycle.getCurrentApplication());
+        if (this._pPanel) {
+          (await this._pPanel).setContext(this._oContext);
+        }
+      };
+      oAppLifeCycle.attachAppLoaded(() => fnUpdate().catch(logError));
+      await fnUpdate();
     }
   });
+
+  async function readContext(oApp) {
+    if (!oApp || oApp.homePage) {
+      return { home: true };
+    }
+    const oIntent = (oApp.getIntent && await oApp.getIntent()) || {};
+    let sTitle;
+    try {
+      sTitle = oApp.componentInstance && oApp.componentInstance.getManifestEntry("/sap.app/title");
+    } catch (e) {
+      // titolo non disponibile: si usa l'intent
+    }
+    return {
+      home: false,
+      semanticObject: oIntent.semanticObject,
+      action: oIntent.action,
+      title: sTitle && !sTitle.startsWith("{{") ? sTitle : undefined
+    };
+  }
 });
