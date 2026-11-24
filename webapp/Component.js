@@ -1,8 +1,9 @@
 sap.ui.define([
   "sap/ui/core/Component",
   "sap/ushell/Container",
+  "sap/ushell/Config",
   "sap/base/Log"
-], function (Component, Container, Log) {
+], function (Component, Container, Config, Log) {
   "use strict";
 
   const BUTTON_ID = "regestaCinghyButton";
@@ -23,13 +24,18 @@ sap.ui.define([
 
     _createButton: async function () {
       const oExtension = await Container.getServiceAsync("Extension");
-      const oItem = await oExtension.createHeaderItem({
+      const bWebComponentsBar = Config.last("/core/shellBar/enabled");
+      const oProperties = {
         id: BUTTON_ID,
-        icon: sap.ui.require.toUrl("regesta/cinghy/img/03_analisi_dati_occhiali_ar.webp"),
-        tooltip: "Cinghy",
-        ariaLabel: "Cinghy, assistente AI",
+        icon: await getButtonIcon(bWebComponentsBar),
+        text: "Cinghy",
+        tooltip: "Cinghy, assistente AI",
         press: () => this._togglePanel().catch(logError)
-      }, {
+      };
+      if (!bWebComponentsBar) {
+        oProperties.ariaLabel = "Cinghy, assistente AI"; // esiste solo nella barra classica
+      }
+      const oItem = await oExtension.createHeaderItem(oProperties, {
         position: "end"
       });
       oItem.showForAllApps();
@@ -62,6 +68,17 @@ sap.ui.define([
       await fnUpdate();
     }
   });
+
+  // La shell bar a Web Components accetta solo icone registrate (non URL di immagini):
+  // lì si registra il cinghiale; la barra classica (es. sandbox) vuole un'icona sap-icon://.
+  function getButtonIcon(bWebComponentsBar) {
+    if (!bWebComponentsBar) {
+      return Promise.resolve("sap-icon://ai");
+    }
+    return new Promise((resolve, reject) => {
+      sap.ui.require(["regesta/cinghy/CinghyIcon"], resolve, reject);
+    });
+  }
 
   async function readContext(oApp) {
     if (!oApp || oApp.homePage) {

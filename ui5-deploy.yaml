@@ -1,0 +1,23 @@
+# Deploy di dist/ come BSP /REG/CINGHY nel repository SAPUI5 di S/4 on-premise.
+# Uso: npm run deploy (prima esegue la build). Credenziali e ordine di trasporto in .env.
+specVersion: '4.0'
+metadata:
+  name: regesta.cinghy
+type: application
+builder:
+  customTasks:
+    - name: abap-deploy-task
+      configuration:
+        target:
+          url: https://reg-proxy.regestaitalia.it:44310
+          client: '100' 
+        credentials:
+          username: env:CINGHY_SAP_USER
+          password: env:CINGHY_SAP_PASSWORD
+        app:
+          name: /REG/CINGHY
+          description: Cinghy - assistente AI nel Launchpad
+          package: /REG/CINGHY
+          transport: env:CINGHY_TRANSPORT
+        exclude:
+          - /test/

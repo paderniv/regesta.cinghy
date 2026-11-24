@@ -28,8 +28,8 @@ sap.ui.define([
   const InvisibleMessageMode = coreLibrary.InvisibleMessageMode;
   const SHELL_HEADER_ID = "shell-header";
   const FALLBACK_TOP_PX = 52;
-  const AVATAR = "regesta/cinghy/img/01_pronto_sorridente.webp";
-  const AVATAR_THINKING = "regesta/cinghy/img/02_elaborazione_pensieroso.webp";
+  const AVATAR = "regesta/cinghy/img/01_pronto_sorridente.png";
+  const AVATAR_THINKING = "regesta/cinghy/img/02_elaborazione_pensieroso.png";
   const WELCOME = "Ciao! Sono **Cinghy**, il tuo assistente. Come posso aiutarti?";
 
   /**

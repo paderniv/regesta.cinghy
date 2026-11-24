@@ -5,7 +5,11 @@
   "description": "Cinghy - assistente AI nel Fiori Launchpad (plugin regesta.cinghy)",
   "scripts": {
     "start": "ui5 serve --open test/flpSandbox.html#Shell-home",
-    "build": "ui5 build --clean-dest"
+    "build": "ui5 build --clean-dest",
+    "deploy": "npm run build && deploy -c ui5-deploy.yaml",
+    "deploy:test": "npm run build && deploy -c ui5-deploy.yaml --test",
+    "undeploy": "undeploy -c ui5-deploy.yaml",
+    "icon": "node scripts/genicon.cjs webapp/img/03_analisi_dati_occhiali_ar.svg webapp/CinghyIcon.js"
   },
   "dependencies": {
     "@ui5/webcomponents": "^2.29.0",
@@ -14,6 +18,7 @@
     "marked": "^18.2.1"
   },
   "devDependencies": {
+    "@sap-ux/deploy-tooling": "^1.0.60",
     "@ui5/cli": "^4.1.0",
     "ui5-tooling-modules": "^3.43.2"
   }
