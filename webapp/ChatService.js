@@ -1,41 +1,124 @@
 sap.ui.define([], function () {
   "use strict";
 
-  // Risposte simulate finché non esiste il backend ABAP: il backend sostituirà solo send().
-  const DELAY_MS = 1200;
-  const FORCE_ERROR = "#errore";
+  // Servizio dell'agente AMS su RST (design 7). Nella sandbox flpInit sostituisce il trasporto
+  // con un backend simulato (test/SimulatedAms.js); il resto del modulo non cambia.
+  const BASE = "/sap/bc/reg/cinghy_ams";
+  const POLL_MS = 2000;
 
+  function url(sPath) {
+    const sClient = new URLSearchParams(window.location.search).get("sap-client");
+    return BASE + sPath + (sClient ? "?sap-client=" + encodeURIComponent(sClient) : "");
+  }
+
+  async function request(sMethod, sPath, oBody) {
+    const oHeaders = { Accept: "application/json" };
+    if (sMethod !== "GET") {
+      oHeaders["Content-Type"] = "application/json";
+      oHeaders["X-Requested-With"] = "XMLHttpRequest"; // RST rifiuta le POST senza (CSRF)
+    }
+    const oResponse = await fetch(url(sPath), {
+      method: sMethod,
+      credentials: "same-origin",
+      headers: oHeaders,
+      body: oBody ? JSON.stringify(oBody) : undefined
+    });
+    let oJson;
+    try {
+      oJson = await oResponse.json();
+    } catch (e) {
+      // per esempio la pagina di login dopo una sessione scaduta
+      throw Object.assign(new Error("Risposta inattesa da RST (" + oResponse.status + ")"), { status: 0 });
+    }
+    if (!oResponse.ok) {
+      throw Object.assign(new Error(oJson.error || "Errore " + oResponse.status), { status: oResponse.status });
+    }
+    return oJson;
+  }
+
+  const oHttp = { request: request, url: url };
+  let oTransport = oHttp;
+
+  /**
+   * Errori con status 4xx: RST ha risposto con un messaggio per il consulente (runner spento,
+   * portale non configurato, non autorizzato). Gli altri sono guasti: rete, sessione, server.
+   */
   return {
+    POLL_MS: POLL_MS,
+
+    /** Trasporto verso RST, il predefinito. */
+    http: oHttp,
+
+    /** @param {{request: function, url: function}} oNewTransport */
+    setTransport: function (oNewTransport) {
+      oTransport = oNewTransport;
+    },
+
+    start: function (sInstruction) {
+      return oTransport.request("POST", "/operations", { instruction: sInstruction });
+    },
+
+    status: function (sOpId) {
+      return oTransport.request("GET", "/operations/" + sOpId);
+    },
+
+    /** @param {"confirm"|"cancel"|"modify"} sDecision */
+    decide: function (sOpId, sDecision, sNote) {
+      return oTransport.request("POST", "/operations/" + sOpId + "/decision", { decision: sDecision, note: sNote || "" });
+    },
+
+    stop: function (sOpId) {
+      return oTransport.request("POST", "/operations/" + sOpId + "/stop");
+    },
+
+    loginDone: function (sOpId) {
+      return oTransport.request("POST", "/operations/" + sOpId + "/login-done");
+    },
+
+    pairingCode: function () {
+      return oTransport.request("POST", "/runners/pairing-code");
+    },
+
+    // Indirizzo del servizio per il runner, da dare al consulente con il codice di associazione.
+    runnerUrl: function () {
+      return window.location.origin + url("").replace(BASE, BASE + "_rn");
+    },
+
+    screenshotUrl: function (sOpId) {
+      return oTransport.url("/operations/" + sOpId + "/screenshot");
+    },
+
     /**
-     * @param {Array<{role: "user"|"assistant", text: string}>} aMessages cronologia completa, l'ultimo è dell'utente
-     * @param {{home: boolean, semanticObject?: string, action?: string, title?: string}} oContext app corrente
-     * @param {number} [iDelay] ritardo in ms (i test lo azzerano)
-     * @returns {Promise<string>} risposta in markdown
+     * Segue l'operazione finché non è finita: chiama fnUpdate a ogni stato letto.
+     * Un 4xx (operazione sparita o non più autorizzata) la chiude con un errore; un guasto
+     * di rete si ritenta al giro successivo.
+     * @returns {function} ferma il polling
      */
-    send: function (aMessages, oContext, iDelay) {
-      const sQuestion = aMessages[aMessages.length - 1].text;
-      return new Promise(function (resolve, reject) {
-        setTimeout(function () {
-          if (sQuestion.includes(FORCE_ERROR)) {
-            reject(new Error("Errore simulato"));
-            return;
+    follow: function (sOpId, fnUpdate, iInterval) {
+      let bStopped = false;
+      const fnTick = async () => {
+        let oStatus;
+        try {
+          oStatus = await this.status(sOpId);
+        } catch (oError) {
+          if (oError.status >= 400 && oError.status < 500) {
+            oStatus = { opId: sOpId, status: "ERROR", final: true, progress: oError.message };
           }
-          const sWhere = oContext.home ? "la **Home** del Launchpad"
-            : "l'app **" + (oContext.title || oContext.semanticObject + "-" + oContext.action) + "**";
-          resolve([
-            "_Risposta simulata: il backend di Cinghy non è ancora collegato._",
-            "",
-            "Hai scritto: \"" + sQuestion + "\" mentre eri su " + sWhere + ".",
-            "",
-            "Quando il backend sarà attivo potrò, per esempio:",
-            "- spiegarti cosa vedi in questa pagina",
-            "- rispondere a domande sui processi SAP",
-            "- usare `codice` e [link](https://www.regestaitalia.eu) come questi",
-            "",
-            "Scrivi `" + FORCE_ERROR + "` in un messaggio per provare la gestione degli errori."
-          ].join("\n"));
-        }, iDelay === undefined ? DELAY_MS : iDelay);
-      });
+        }
+        if (bStopped) {
+          return;
+        }
+        if (oStatus) {
+          fnUpdate(oStatus);
+        }
+        if (!oStatus || !oStatus.final) {
+          setTimeout(fnTick, iInterval === undefined ? POLL_MS : iInterval);
+        }
+      };
+      fnTick();
+      return function () {
+        bStopped = true;
+      };
     }
   };
 });

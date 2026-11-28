@@ -9,7 +9,8 @@
     "deploy": "npm run build && deploy -c ui5-deploy.yaml",
     "deploy:test": "npm run build && deploy -c ui5-deploy.yaml --test",
     "undeploy": "undeploy -c ui5-deploy.yaml",
-    "icon": "node scripts/genicon.cjs webapp/img/03_analisi_dati_occhiali_ar.svg webapp/CinghyIcon.js"
+    "icon": "node scripts/genicon.cjs webapp/img/03_analisi_dati_occhiali_ar.svg webapp/CinghyIcon.js",
+    "test:e2e": "node --test --test-concurrency=1 \"webapp/test/e2e/*.e2e.mjs\""
   },
   "dependencies": {
     "@ui5/webcomponents": "^2.29.0",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@sap-ux/deploy-tooling": "^1.0.60",
     "@ui5/cli": "^4.1.0",
+    "playwright-core": "^1.65.1",
     "ui5-tooling-modules": "^3.43.2"
   }
 }

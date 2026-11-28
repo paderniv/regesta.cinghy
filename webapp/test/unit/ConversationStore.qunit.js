@@ -3,7 +3,7 @@ sap.ui.define(["regesta/cinghy/ConversationStore"], function (ConversationStore)
 
   function memoryStorage() {
     const m = {};
-    return { getItem: (k) => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); } };
+    return { getItem: (k) => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); }, removeItem: (k) => { delete m[k]; } };
   }
   const brokenStorage = {
     getItem: () => { throw new Error("SecurityError"); },
@@ -32,5 +32,22 @@ sap.ui.define(["regesta/cinghy/ConversationStore"], function (ConversationStore)
     assert.deepEqual(ConversationStore.load(brokenStorage), []);
     ConversationStore.save([{ role: "user", text: "x" }], brokenStorage);
     assert.ok(true, "save non lancia");
+  });
+
+  QUnit.test("i messaggi transient (codice del runner) non si conservano", function (assert) {
+    const oStorage = memoryStorage();
+    ConversationStore.save([{ role: "user", text: "a" }, { role: "assistant", text: "ABCD2345", transient: true }], oStorage);
+    assert.deepEqual(ConversationStore.load(oStorage), [{ role: "user", text: "a" }]);
+  });
+
+  QUnit.test("id dell'operazione in corso: salva, ripristina, cancella", function (assert) {
+    const oStorage = memoryStorage();
+    assert.strictEqual(ConversationStore.loadOperation(oStorage), "");
+    ConversationStore.saveOperation("ABC", oStorage);
+    assert.strictEqual(ConversationStore.loadOperation(oStorage), "ABC");
+    ConversationStore.saveOperation("", oStorage);
+    assert.strictEqual(ConversationStore.loadOperation(oStorage), "");
+    ConversationStore.saveOperation("ABC", brokenStorage);
+    assert.strictEqual(ConversationStore.loadOperation(brokenStorage), "", "storage bloccato");
   });
 });

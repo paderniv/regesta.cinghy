@@ -1,0 +1,19 @@
+@EndUserText.label : 'Agente AMS: runner associati'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #RESTRICTED
+define table /reg/ams_run {
+
+  key client    : mandt not null;
+  key runner_id : sysuuid_x16 not null;
+  owner         : syuname;
+  name          : abap.char(60);
+  token_hash    : abap.char(64);
+  pair_hash     : abap.char(64);
+  pair_until    : timestampl;
+  revoked       : abap_boolean;
+  last_seen     : timestampl;
+  created_at    : timestampl;
+
+}

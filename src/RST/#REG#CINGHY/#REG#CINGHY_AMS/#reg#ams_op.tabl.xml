@@ -1,0 +1,27 @@
+@EndUserText.label : 'Agente AMS: operazioni'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #RESTRICTED
+define table /reg/ams_op {
+
+  key client     : mandt not null;
+  key op_id      : sysuuid_x16 not null;
+  consultant     : syuname;
+  portal         : abap.char(20);
+  llm            : abap.char(20);
+  status         : abap.char(10);
+  phase          : abap.char(1);
+  stop_requested : abap_boolean;
+  steps          : abap.int4;
+  progress       : abap.char(255);
+  instruction    : abap.string(0);
+  plan_json      : abap.string(0);
+  result_text    : abap.string(0);
+  conversation   : abap.string(0);
+  input_tokens   : abap.int4;
+  output_tokens  : abap.int4;
+  created_at     : timestampl;
+  changed_at     : timestampl;
+
+}

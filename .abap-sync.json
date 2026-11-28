@@ -1,0 +1,16 @@
+{
+  "defaultSystem": "RST",
+  "sourceDir": "./src",
+  "systems": {
+    "RST": {
+      "alias": "RST",
+      "url": "$SAP_RST_URL",
+      "client": "$SAP_RST_CLIENT",
+      "insecure": true,
+      "auth": {
+        "user": "$SAP_RST_USER",
+        "password": "$SAP_RST_PASSWORD"
+      }
+    }
+  }
+}

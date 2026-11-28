@@ -1,0 +1,16 @@
+{
+  "name": "cinghy-ams-runner",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Runner dell'agente AMS di Cinghy: esegue nel browser le azioni decise su RST",
+  "type": "module",
+  "engines": { "node": ">=22.15" },
+  "scripts": {
+    "start": "node src/main.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "@playwright/mcp": "0.0.85"
+  }
+}

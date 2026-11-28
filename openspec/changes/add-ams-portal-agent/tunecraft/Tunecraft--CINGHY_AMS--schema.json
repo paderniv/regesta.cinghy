@@ -1,0 +1,213 @@
+{
+  "schema": {
+    "type": "object",
+    "properties": {
+      "DEFAULT_LLM": {
+        "type": "string",
+        "description": "Codice in LLMS del modello usato quando il portale non ne indica uno"
+      },
+      "LLMS": {
+        "type": "array",
+        "format": "table",
+        "description": "Modelli linguistici disponibili per l'agente. Le chiavi API NON vanno qui: si inseriscono con il report della tabella /REG/AMS_KEY",
+        "required": [
+          "LLM",
+          "PROVIDER",
+          "MODEL",
+          "DESTINATION"
+        ],
+        "items": {
+          "type": "object",
+          "properties": {
+            "LLM": {
+              "type": "string",
+              "description": "Codice del modello, maiuscolo, max 20 caratteri, per esempio OPENAI_MAIN"
+            },
+            "PROVIDER": {
+              "type": "string",
+              "description": "Tipo di fornitore: OPENAI, GEMINI o ANTHROPIC"
+            },
+            "MODEL": {
+              "type": "string",
+              "description": "Nome del modello come lo vuole l'API del fornitore"
+            },
+            "DESTINATION": {
+              "type": "string",
+              "description": "Destinazione SM59 di tipo G verso l'API del fornitore"
+            },
+            "MAX_OUTPUT_TOKENS": {
+              "type": "integer",
+              "description": "Token massimi di ogni risposta del modello; vuoto = valore predefinito dell'adattatore"
+            }
+          }
+        }
+      },
+      "MAX_STEPS": {
+        "type": "integer",
+        "description": "Numero massimo di chiamate a Claude per operazione: oltre, l'operazione si ferma con errore"
+      },
+      "TIMEOUT_MINUTES": {
+        "type": "integer",
+        "description": "Minuti di attesa del runner o del consulente prima che l'operazione si fermi"
+      },
+      "PORTALS": {
+        "type": "array",
+        "format": "table",
+        "description": "Un profilo per portale cliente. Mai password o altri segreti",
+        "required": [
+          "PORTAL",
+          "CUSTOMER",
+          "ENTRY_URL",
+          "RUNNER_KIND"
+        ],
+        "items": {
+          "type": "object",
+          "properties": {
+            "PORTAL": {
+              "type": "string",
+              "description": "Codice del portale, maiuscolo, max 20 caratteri, per esempio PITTINI"
+            },
+            "CUSTOMER": {
+              "type": "string",
+              "description": "Nome del cliente con cui il consulente lo cita in Cinghy"
+            },
+            "ENTRY_URL": {
+              "type": "string",
+              "description": "URL di ingresso del portale"
+            },
+            "RUNNER_KIND": {
+              "type": "string",
+              "description": "LOCAL (runner sul PC del consulente) o CENTRAL"
+            },
+            "LOGIN_MODE": {
+              "type": "string",
+              "description": "Tipo di login, solo come descrizione: per esempio SHARED_ACCOUNT. Mai la password"
+            },
+            "ACTIVE": {
+              "type": "boolean",
+              "description": "Portale utilizzabile dai consulenti"
+            },
+            "INSTRUCTIONS": {
+              "type": "string",
+              "description": "Istruzioni di navigazione per l'agente: dove sono ricerca, campi e pulsanti, descritti per etichetta"
+            },
+            "LLM": {
+              "type": "string",
+              "description": "Codice in LLMS del modello per questo portale; vuoto = DEFAULT_LLM"
+            }
+          }
+        }
+      },
+      "PORTAL_DOMAINS": {
+        "type": "array",
+        "format": "table",
+        "description": "Domini su cui il runner puo navigare, per portale. Quelli di login vanno marcati",
+        "required": [
+          "PORTAL",
+          "DOMAIN"
+        ],
+        "items": {
+          "type": "object",
+          "properties": {
+            "PORTAL": {
+              "type": "string",
+              "description": "Codice del portale in PORTALS"
+            },
+            "DOMAIN": {
+              "type": "string",
+              "description": "Nome host senza protocollo, per esempio hdserver.pittini.it"
+            },
+            "IS_LOGIN": {
+              "type": "boolean",
+              "description": "Dominio di login: la pagina non arriva al modello e l'operazione si sospende"
+            }
+          }
+        }
+      },
+      "SAFE_BUTTONS": {
+        "type": "array",
+        "format": "table",
+        "description": "Pulsanti cliccabili in fase di lettura. Solo pulsanti che non modificano nulla",
+        "required": [
+          "PORTAL",
+          "LABEL"
+        ],
+        "items": {
+          "type": "object",
+          "properties": {
+            "PORTAL": {
+              "type": "string",
+              "description": "Codice del portale in PORTALS"
+            },
+            "LABEL": {
+              "type": "string",
+              "description": "Etichetta esatta del pulsante, per esempio Cerca"
+            }
+          }
+        }
+      },
+      "FORBIDDEN_ELEMENTS": {
+        "type": "array",
+        "format": "table",
+        "description": "Elementi che l'agente non deve mai cliccare o compilare, in nessuna fase, qualunque sia il tipo (pulsante, link...): per esempio un link che avvia un timer",
+        "required": [
+          "PORTAL",
+          "LABEL"
+        ],
+        "items": {
+          "type": "object",
+          "properties": {
+            "PORTAL": {
+              "type": "string",
+              "description": "Codice del portale in PORTALS"
+            },
+            "LABEL": {
+              "type": "string",
+              "description": "Nome esatto dell'elemento nella pagina, per esempio Timer"
+            }
+          }
+        }
+      },
+      "VALUE_MAP": {
+        "type": "array",
+        "format": "table",
+        "description": "Corrispondenze tra i valori detti dal consulente e quelli del portale",
+        "required": [
+          "PORTAL",
+          "FIELD",
+          "REQUESTED",
+          "PORTAL_VALUE"
+        ],
+        "items": {
+          "type": "object",
+          "properties": {
+            "PORTAL": {
+              "type": "string",
+              "description": "Codice del portale in PORTALS"
+            },
+            "FIELD": {
+              "type": "string",
+              "description": "Campo del ticket, per esempio PRIORITA, STATO, GRUPPO"
+            },
+            "REQUESTED": {
+              "type": "string",
+              "description": "Valore come lo dice il consulente, per esempio alta"
+            },
+            "PORTAL_VALUE": {
+              "type": "string",
+              "description": "Valore da impostare nel portale, per esempio P2"
+            }
+          }
+        }
+      }
+    },
+    "required": [
+      "DEFAULT_LLM",
+      "LLMS",
+      "MAX_STEPS",
+      "TIMEOUT_MINUTES",
+      "PORTALS",
+      "PORTAL_DOMAINS"
+    ]
+  }
+}

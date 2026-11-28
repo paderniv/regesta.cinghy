@@ -1,0 +1,62 @@
+{
+  "DEFAULT_LLM": "GEMINI",
+  "LLMS": [
+    {
+      "LLM": "OPENAI",
+      "PROVIDER": "OPENAI",
+      "MODEL": "gpt-6.2-sol",
+      "DESTINATION": "CINGHY_OPENAI",
+      "MAX_OUTPUT_TOKENS": 32000
+    },
+    {
+      "LLM": "GEMINI",
+      "PROVIDER": "GEMINI",
+      "MODEL": "gemini-4-carbon",
+      "DESTINATION": "CINGHY_GEMINI",
+      "MAX_OUTPUT_TOKENS": 32768
+    }
+  ],
+  "MAX_STEPS": 40,
+  "TIMEOUT_MINUTES": 15,
+  "PORTALS": [
+    {
+      "PORTAL": "PITTINI",
+      "CUSTOMER": "Pittini",
+      "ENTRY_URL": "https://hdserver.pittini.it/",
+      "RUNNER_KIND": "LOCAL",
+      "LOGIN_MODE": "SHARED_ACCOUNT",
+      "ACTIVE": true,
+      "INSTRUCTIONS": "Portale ServiceDesk Plus di Pittini. I ticket si chiamano Requests.\n- Per aprire un ticket con il suo numero usa browser_navigate su https://hdserver.pittini.it/WorkOrder.do?woMode=viewWO&woID=<numero>. Non cercarlo dalla lista: la vista predefinita \"Aperti a Regesta\" non mostra i ticket chiusi e il campo ID della ricerca non ha nome.\n- Pagina del ticket: in alto titolo, richiedente e date; a destra stato, priorita', tecnico, gruppo e sito. Le schede Details, Resolution, Tasks, Checklist, Work Logs, Time Analysis, Associations e History si aprono con un clic e sono di sola lettura.\n- Sotto i dettagli c'e' la sezione Conversations con le email e le note; \"Load more conversations\" carica le piu' vecchie e \"Expand all\" mostra il testo di tutte.\n- Per tornare alla lista usa \"Back to list view\".\n- Pulsanti che modificano: Edit, Assign, Actions, Reply, Reply All, Forward, Add Notes e i pulsanti di Next Transition (\"3 - Attesa info utente\", \"4 - Pianificata\", \"5 - Valutazione modifica\", \"6 - Attesa info fornitore\", \"7 - Risolta\"). Si usano solo in esecuzione, nel piano confermato.",
+      "LLM": ""
+    }
+  ],
+  "PORTAL_DOMAINS": [
+    {
+      "PORTAL": "PITTINI",
+      "DOMAIN": "hdserver.pittini.it",
+      "IS_LOGIN": false
+    },
+    {
+      "PORTAL": "PITTINI",
+      "DOMAIN": "login.microsoftonline.com",
+      "IS_LOGIN": true
+    }
+  ],
+  "SAFE_BUTTONS": [
+    {
+      "PORTAL": "PITTINI",
+      "LABEL": "Back to list view"
+    },
+    {
+      "PORTAL": "PITTINI",
+      "LABEL": "Expand all"
+    }
+  ],
+  "FORBIDDEN_ELEMENTS": [
+    {
+      "PORTAL": "PITTINI",
+      "LABEL": "Timer"
+    }
+  ],
+  "VALUE_MAP": []
+}

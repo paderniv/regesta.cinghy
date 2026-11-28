@@ -1,0 +1,14 @@
+@EndUserText.label : 'Agente AMS: chiavi API dei modelli'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #NOT_ALLOWED
+define table /reg/ams_key {
+
+  key client : mandt not null;
+  key llm    : abap.char(20) not null;
+  api_key    : abap.char(512);
+  changed_by : syuname;
+  changed_at : timestampl;
+
+}

@@ -1,0 +1,6 @@
+{
+  "enabledMcpjsonServers": ["arc-1"],
+  "permissions": {
+    "deny": ["Read(.env)", "Edit(.env)"]
+  }
+}

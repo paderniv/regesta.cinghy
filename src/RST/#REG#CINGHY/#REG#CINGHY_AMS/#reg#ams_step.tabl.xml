@@ -1,0 +1,31 @@
+@EndUserText.label : 'Agente AMS: passi (coda azioni e registro)'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #RESTRICTED
+define table /reg/ams_step {
+
+  key client    : mandt not null;
+  key step_id   : sysuuid_x16 not null;
+  op_id         : sysuuid_x16;
+  seq           : abap.int4;
+  kind          : abap.char(10);
+  tool          : abap.char(40);
+  call_id       : abap.char(80);
+  plan_step     : abap.int4;
+  elem_role     : abap.char(40);
+  elem_name     : abap.char(255);
+  status        : abap.char(1);
+  is_error      : abap_boolean;
+  outcome       : abap.char(255);
+  args          : abap.string(0);
+  result_text   : abap.string(0);
+  screenshot    : abap.rawstring(0);
+  input_tokens  : abap.int4;
+  output_tokens : abap.int4;
+  created_by    : syuname;
+  created_at    : timestampl;
+  delivered_at  : timestampl;
+  done_at       : timestampl;
+
+}

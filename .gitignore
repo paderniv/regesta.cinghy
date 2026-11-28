@@ -3,3 +3,4 @@ dist/
 .DS_Store
 .ui5-tooling-modules/
 .env
+.abap-sync.state.json

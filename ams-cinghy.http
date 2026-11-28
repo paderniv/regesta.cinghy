@@ -1,0 +1,99 @@
+# Chiamate di prova del servizio dell'agente AMS per Cinghy (task 4.1).
+# Estensione VS Code "REST Client" (humao.rest-client): "Send Request" sopra ogni richiesta.
+# Dal .env del progetto si leggono solo SAP_URL e SAP_CLIENT (lo stesso RST di arc-1) e
+# AMS_NOAUTH_USER / AMS_NOAUTH_PASSWORD (utente RST senza autorizzazione all'agente).
+# Utente e password del consulente (ruolo "consulente AMS") li chiede REST Client all'invio:
+# non vanno nel .env, e l'utente di arc-1 (SAP_USER) non va usato qui.
+# Percorso del nodo SICF con handler /REG/CL_AMS_HTTP_CINGHY: correggerlo se diverso.
+
+@base = {{$dotenv SAP_URL}}/sap/bc/reg/cinghy_ams
+@client = {{$dotenv SAP_CLIENT}}
+@noauth = Basic {{$dotenv AMS_NOAUTH_USER}}:{{$dotenv AMS_NOAUTH_PASSWORD}}
+
+### 1. Runner del consulente collegato?
+# @prompt sapUser Utente SAP del consulente
+# @prompt sapPassword Password SAP del consulente
+GET {{base}}/runners/me?sap-client={{client}}
+Authorization: Basic {{sapUser}}:{{sapPassword}}
+
+### 2. Codice di associazione del runner (valido 10 minuti)
+# @prompt sapUser Utente SAP del consulente
+# @prompt sapPassword Password SAP del consulente
+POST {{base}}/runners/pairing-code?sap-client={{client}}
+Authorization: Basic {{sapUser}}:{{sapPassword}}
+X-Requested-With: XMLHttpRequest
+
+### 3. Avvio di un'operazione (atteso 409 se il runner non e' collegato)
+# @prompt sapUser Utente SAP del consulente
+# @prompt sapPassword Password SAP del consulente
+# @name start
+POST {{base}}/operations?sap-client={{client}}
+Authorization: Basic {{sapUser}}:{{sapPassword}}
+X-Requested-With: XMLHttpRequest
+Content-Type: application/json
+
+{"instruction": "Pittini: leggi il ticket 144090 e riassumilo"}
+
+### 4. Portale non configurato (atteso 422 con l'elenco dei portali)
+# @prompt sapUser Utente SAP del consulente
+# @prompt sapPassword Password SAP del consulente
+POST {{base}}/operations?sap-client={{client}}
+Authorization: Basic {{sapUser}}:{{sapPassword}}
+X-Requested-With: XMLHttpRequest
+Content-Type: application/json
+
+{"instruction": "Beta: leggi il ticket 9"}
+
+### 5. Stato dell'operazione avviata al punto 3
+# @prompt sapUser Utente SAP del consulente
+# @prompt sapPassword Password SAP del consulente
+GET {{base}}/operations/{{start.response.body.opId}}?sap-client={{client}}
+Authorization: Basic {{sapUser}}:{{sapPassword}}
+
+### 6. Decisione sul piano (solo con l'operazione in PLAN_WAIT; altrimenti atteso 400)
+# @prompt sapUser Utente SAP del consulente
+# @prompt sapPassword Password SAP del consulente
+POST {{base}}/operations/{{start.response.body.opId}}/decision?sap-client={{client}}
+Authorization: Basic {{sapUser}}:{{sapPassword}}
+X-Requested-With: XMLHttpRequest
+Content-Type: application/json
+
+{"decision": "cancel"}
+
+### 7. Interruzione
+# @prompt sapUser Utente SAP del consulente
+# @prompt sapPassword Password SAP del consulente
+POST {{base}}/operations/{{start.response.body.opId}}/stop?sap-client={{client}}
+Authorization: Basic {{sapUser}}:{{sapPassword}}
+X-Requested-With: XMLHttpRequest
+
+### 8. "Ho fatto l'accesso" (solo con l'operazione in LOGIN_WAIT; altrimenti atteso 400)
+# @prompt sapUser Utente SAP del consulente
+# @prompt sapPassword Password SAP del consulente
+POST {{base}}/operations/{{start.response.body.opId}}/login-done?sap-client={{client}}
+Authorization: Basic {{sapUser}}:{{sapPassword}}
+X-Requested-With: XMLHttpRequest
+
+### 9. POST senza X-Requested-With (atteso 403: protezione CSRF)
+# @prompt sapUser Utente SAP del consulente
+# @prompt sapPassword Password SAP del consulente
+POST {{base}}/runners/pairing-code?sap-client={{client}}
+Authorization: Basic {{sapUser}}:{{sapPassword}}
+
+### 10. Utente senza autorizzazione all'agente (atteso 403)
+POST {{base}}/operations?sap-client={{client}}
+Authorization: {{noauth}}
+X-Requested-With: XMLHttpRequest
+Content-Type: application/json
+
+{"instruction": "Pittini: leggi il ticket 12345"}
+
+### 11. Operazione di un altro consulente (atteso 404): utente senza autorizzazione sull'operazione del punto 3
+GET {{base}}/operations/{{start.response.body.opId}}?sap-client={{client}}
+Authorization: {{noauth}}
+
+### 12. Percorso inesistente (atteso 404)
+# @prompt sapUser Utente SAP del consulente
+# @prompt sapPassword Password SAP del consulente
+GET {{base}}/nulla?sap-client={{client}}
+Authorization: Basic {{sapUser}}:{{sapPassword}}
